@@ -90,10 +90,6 @@ async function runScheduledMerge(config, settings) {
 
     const mergedSubject = MergeEngine.process(parsed.subject, vars);
     const mergedHtml = MergeEngine.process(parsed.htmlBody || parsed.textBody, vars, {
-      unsubscribeUrl: config.addUnsubscribe && config.trackingServerUrl
-        ? `${config.trackingServerUrl}?type=unsubscribe&email=${encodeURIComponent(email)}`
-        : null,
-      unsubscribeText: config.unsubscribeText,
     });
     const mergedText = MergeEngine.process(parsed.textBody, vars);
 

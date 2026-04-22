@@ -14,8 +14,6 @@
  *      → Returns a 1x1 tracking pixel, records open in the spreadsheet.
  *   ?type=click&cid=CAMPAIGN_ID&email=EMAIL&url=ORIGINAL_URL
  *      → Redirects to the original URL and records click.
- *   ?type=unsubscribe&email=EMAIL
- *      → Shows unsubscribe confirmation page and records unsubscribe.
  *   ?type=status&cid=CAMPAIGN_ID
  *      → Returns JSON open/click counts for a campaign.
  *
@@ -28,7 +26,6 @@
 // URL parameter by the extension, so tracking logs go into the same sheet
 // used for each campaign automatically.
 const TRACKING_SHEET_NAME = 'Tracking Log';
-const UNSUBSCRIBE_SHEET_NAME = 'Unsubscribes';
 
 // ─── MAIN HANDLER ───────────────────────────────────────────────────────────
 function doGet(e) {
@@ -50,13 +47,6 @@ function doGet(e) {
       return HtmlService.createHtmlOutput(redirectScript(redirectUrl));
     }
 
-    if (type === 'unsubscribe') {
-      if (params.confirmed === '1') {
-        recordUnsubscribe(spreadsheetId, email);
-        return HtmlService.createHtmlOutput(unsubscribedPage());
-      }
-      return HtmlService.createHtmlOutput(confirmUnsubscribePage(email, getWebAppUrl(e)));
-    }
 
     if (type === 'status') {
       return ContentService
@@ -91,36 +81,24 @@ function recordEvent(spreadsheetId, campaignId, email, eventType, url) {
   ]);
 }
 
-function recordUnsubscribe(spreadsheetId, email) {
-  const ss = SpreadsheetApp.openById(spreadsheetId);
-  let sheet = ss.getSheetByName(UNSUBSCRIBE_SHEET_NAME);
-  if (!sheet) {
-    sheet = ss.insertSheet(UNSUBSCRIBE_SHEET_NAME);
-    sheet.appendRow(['Timestamp', 'Email']);
-    sheet.setFrozenRows(1);
-  }
-  sheet.appendRow([new Date().toISOString(), email]);
-  recordEvent(spreadsheetId, '', email, 'unsubscribe');
-}
 
 function getCampaignStats(spreadsheetId, campaignId) {
   try {
     const ss = SpreadsheetApp.openById(spreadsheetId);
     const sheet = ss.getSheetByName(TRACKING_SHEET_NAME);
-    if (!sheet) return { opens: 0, clicks: 0, unsubscribes: 0 };
+    if (!sheet) return { opens: 0, clicks: 0 };
     const data = sheet.getDataRange().getValues();
-    let opens = 0, clicks = 0, unsubscribes = 0;
+    let opens = 0, clicks = 0;
     for (let i = 1; i < data.length; i++) {
       if (data[i][1] === campaignId) {
         const ev = data[i][3];
         if (ev === 'open') opens++;
         else if (ev === 'click') clicks++;
-        else if (ev === 'unsubscribe') unsubscribes++;
       }
     }
-    return { opens, clicks, unsubscribes };
+    return { opens, clicks };
   } catch {
-    return { opens: 0, clicks: 0, unsubscribes: 0 };
+    return { opens: 0, clicks: 0 };
   }
 }
 
@@ -140,34 +118,4 @@ function redirectScript(url) {
 <body><a href="${safe}">Click here if not redirected</a></body></html>`;
 }
 
-function confirmUnsubscribePage(email, baseUrl) {
-  const enc = encodeURIComponent(email);
-  return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Unsubscribe</title>
-<style>body{font-family:sans-serif;max-width:400px;margin:80px auto;text-align:center;color:#333}
-h2{color:#d93025}button{background:#d93025;color:#fff;border:none;padding:12px 28px;border-radius:6px;font-size:16px;cursor:pointer}
-button:hover{background:#b31412}</style></head>
-<body>
-<h2>Unsubscribe</h2>
-<p>Are you sure you want to unsubscribe <strong>${email.replace(/</g, '&lt;')}</strong>?</p>
-<a href="${baseUrl}?type=unsubscribe&email=${enc}&confirmed=1">
-  <button>Yes, Unsubscribe Me</button>
-</a>
-</body></html>`;
-}
 
-function unsubscribedPage() {
-  return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8"><title>Unsubscribed</title>
-<style>body{font-family:sans-serif;max-width:400px;margin:80px auto;text-align:center;color:#333}
-.check{font-size:64px;color:#34a853}</style></head>
-<body>
-<div class="check">✓</div>
-<h2>You've been unsubscribed</h2>
-<p>You will no longer receive emails from this campaign.</p>
-</body></html>`;
-}
-
-function getWebAppUrl(e) {
-  return e.parameter ? ScriptApp.getService().getUrl() : '';
-}

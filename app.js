@@ -423,9 +423,6 @@ document.querySelectorAll('input[name="send-time"]').forEach(radio => {
 
 document.getElementById('opt-track-opens').addEventListener('change', updateTrackingUI);
 document.getElementById('opt-track-clicks').addEventListener('change', updateTrackingUI);
-document.getElementById('opt-unsubscribe').addEventListener('change', e => {
-  document.getElementById('unsubscribe-section').classList.toggle('hidden', !e.target.checked);
-});
 
 function updateTrackingUI() {
   const needsServer = document.getElementById('opt-track-opens').checked ||
@@ -452,9 +449,7 @@ function buildMergedRecipients() {
   const replyToName = document.getElementById('reply-to-name').value.trim();
   const ccField = document.getElementById('cc-field').value.trim();
   const bccField = document.getElementById('bcc-field').value.trim();
-  const addUnsubscribe = document.getElementById('opt-unsubscribe').checked;
   const trackingUrl = document.getElementById('tracking-server-url')?.value.trim();
-  const unsubText = document.getElementById('unsubscribe-text').value.trim();
   const subject = state.selectedDraft.subject;
   const htmlBody = state.selectedDraft.htmlBody;
   const textBody = state.selectedDraft.textBody;
@@ -483,10 +478,6 @@ function buildMergedRecipients() {
       trackingPixelUrl: (document.getElementById('opt-track-opens').checked && trackingUrl)
         ? `${trackingUrl}?type=open&cid=${encodeURIComponent(state.currentCampaignId || 'campaign')}&email=${encodeURIComponent(email)}&sid=${encodeURIComponent(state.selectedSpreadsheet.id)}`
         : null,
-      unsubscribeUrl: addUnsubscribe && trackingUrl
-        ? `${trackingUrl}?type=unsubscribe&email=${encodeURIComponent(email)}&sid=${encodeURIComponent(state.selectedSpreadsheet.id)}`
-        : null,
-      unsubscribeText: unsubText,
     });
     const mergedText = MergeEngine.process(textBody, vars);
 
@@ -813,9 +804,7 @@ function captureCurrentConfig() {
     updateSheet: document.getElementById('opt-update-sheet').checked,
     trackOpens: document.getElementById('opt-track-opens').checked,
     trackClicks: document.getElementById('opt-track-clicks').checked,
-    addUnsubscribe: document.getElementById('opt-unsubscribe').checked,
     trackingServerUrl: document.getElementById('tracking-server-url')?.value || '',
-    unsubscribeText: document.getElementById('unsubscribe-text').value,
   };
 }
 

@@ -23,8 +23,6 @@ function loadSettings() {
     document.getElementById('default-delay').value = s.defaultDelay !== undefined ? s.defaultDelay : 300;
     document.getElementById('default-batch-size').value = s.defaultBatchSize || 50;
     document.getElementById('tracking-server-url').value = s.trackingServerUrl || '';
-    document.getElementById('unsubscribe-text').value = s.unsubscribeText || 'Unsubscribe from this list';
-    document.getElementById('unsubscribe-style').value = s.unsubscribeStyle || 'standard';
     document.getElementById('status-col-name').value = s.statusColName || 'Email Sent';
   });
 }
@@ -37,8 +35,6 @@ function saveSettings() {
     defaultDelay: parseInt(document.getElementById('default-delay').value) || 300,
     defaultBatchSize: parseInt(document.getElementById('default-batch-size').value) || 50,
     trackingServerUrl: document.getElementById('tracking-server-url').value.trim(),
-    unsubscribeText: document.getElementById('unsubscribe-text').value.trim(),
-    unsubscribeStyle: document.getElementById('unsubscribe-style').value,
     statusColName: document.getElementById('status-col-name').value.trim() || 'Email Sent',
   };
   chrome.storage.local.set({ [SETTINGS_KEY]: s }, () => showToast('Settings saved!'));
