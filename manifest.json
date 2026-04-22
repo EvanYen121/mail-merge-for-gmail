@@ -1,0 +1,60 @@
+{
+  "manifest_version": 3,
+  "name": "Mail Merge for Gmail",
+  "short_name": "Mail Merge",
+  "version": "1.0.0",
+  "description": "Send personalized bulk emails using Gmail drafts and Google Sheets — full YAMM-compatible mail merge.",
+  "permissions": [
+    "identity",
+    "storage",
+    "alarms",
+    "notifications",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://sheets.googleapis.com/*",
+    "https://gmail.googleapis.com/*",
+    "https://www.googleapis.com/*",
+    "https://docs.google.com/*",
+    "https://drive.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.svg",
+      "48": "icons/icon48.svg",
+      "128": "icons/icon128.svg"
+    },
+    "default_title": "Mail Merge for Gmail"
+  },
+  "options_page": "options.html",
+  "oauth2": {
+    "client_id": "YOUR_GOOGLE_OAUTH_CLIENT_ID.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/gmail.send",
+      "https://www.googleapis.com/auth/gmail.readonly",
+      "https://www.googleapis.com/auth/gmail.compose",
+      "https://www.googleapis.com/auth/gmail.modify",
+      "https://www.googleapis.com/auth/spreadsheets",
+      "https://www.googleapis.com/auth/drive.readonly",
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile"
+    ]
+  },
+  "web_accessible_resources": [
+    {
+      "resources": ["app.html", "options.html", "icons/*.svg"],
+      "matches": ["<all_urls>"]
+    }
+  ],
+  "icons": {
+    "16": "icons/icon16.svg",
+    "48": "icons/icon48.svg",
+    "128": "icons/icon128.svg"
+  }
+}

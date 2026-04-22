@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mail Merge for Gmail</title>
+  <link rel="stylesheet" href="app.css">
+</head>
+<body>
+  <!-- ── Top Nav ──────────────────────────────────────────────────────────── -->
+  <nav class="topnav">
+    <div class="nav-brand">
+      <svg width="28" height="28" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+        <rect width="48" height="48" rx="8" fill="#4285F4"/>
+        <rect x="6" y="12" width="36" height="24" rx="3" fill="none" stroke="white" stroke-width="2"/>
+        <path d="M6 16l18 12 18-12" stroke="white" stroke-width="2" fill="none"/>
+        <circle cx="36" cy="30" r="5" fill="#34A853"/>
+        <path d="M33 30h6M36 27v6" stroke="white" stroke-width="1.5"/>
+      </svg>
+      <span>Mail Merge for Gmail</span>
+    </div>
+    <div class="nav-right">
+      <div id="nav-user" class="nav-user hidden">
+        <span id="nav-email" class="nav-email"></span>
+        <img id="nav-avatar" src="" alt="" class="nav-avatar" onerror="this.style.display='none'">
+      </div>
+      <button id="btn-nav-settings" class="icon-btn" title="Settings">⚙</button>
+    </div>
+  </nav>
+
+  <!-- ── Main Layout ──────────────────────────────────────────────────────── -->
+  <div class="app-layout">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <button class="sidebar-btn active" data-view="new-campaign">
+        <span class="sidebar-icon">✉</span> New Campaign
+      </button>
+      <button class="sidebar-btn" data-view="campaigns">
+        <span class="sidebar-icon">📋</span> Campaigns
+      </button>
+      <button class="sidebar-btn" data-view="scheduled">
+        <span class="sidebar-icon">🗓</span> Scheduled
+      </button>
+      <button class="sidebar-btn" data-view="templates">
+        <span class="sidebar-icon">📝</span> Templates
+      </button>
+      <hr class="sidebar-divider">
+      <button class="sidebar-btn" data-view="quota">
+        <span class="sidebar-icon">📊</span> Quota
+      </button>
+    </aside>
+
+    <!-- Content area -->
+    <main class="main-content">
+
+      <!-- ── View: New Campaign Wizard ──────────────────────────────────── -->
+      <div id="view-new-campaign" class="content-view">
+        <!-- Wizard steps indicator -->
+        <div class="wizard-steps">
+          <div class="step active" data-step="1"><span class="step-num">1</span><span class="step-label">Setup</span></div>
+          <div class="step-line"></div>
+          <div class="step" data-step="2"><span class="step-num">2</span><span class="step-label">Configure</span></div>
+          <div class="step-line"></div>
+          <div class="step" data-step="3"><span class="step-num">3</span><span class="step-label">Preview</span></div>
+          <div class="step-line"></div>
+          <div class="step" data-step="4"><span class="step-num">4</span><span class="step-label">Send</span></div>
+        </div>
+
+        <!-- Step 1: Setup -->
+        <div id="step-1" class="wizard-step">
+          <h2>Step 1: Setup your mail merge</h2>
+          <p class="step-desc">Select the spreadsheet with your recipients and a Gmail draft as your template.</p>
+
+          <div class="form-section">
+            <label class="form-label">Campaign Name</label>
+            <input id="campaign-name" type="text" class="form-input" placeholder="e.g. March Newsletter">
+          </div>
+
+          <div class="form-section">
+            <label class="form-label">Spreadsheet <span class="required">*</span></label>
+            <div class="search-wrapper">
+              <input id="sheet-search" type="text" class="form-input" placeholder="Search or paste spreadsheet URL...">
+              <button id="btn-browse-sheets" class="btn btn-sm btn-ghost">Browse</button>
+            </div>
+            <div id="sheet-results" class="dropdown-list hidden"></div>
+            <div id="selected-sheet" class="selected-item hidden">
+              <span class="selected-icon">📊</span>
+              <div class="selected-info">
+                <div id="selected-sheet-name" class="selected-name"></div>
+                <div id="selected-sheet-id" class="selected-sub"></div>
+              </div>
+              <button id="btn-clear-sheet" class="clear-btn">✕</button>
+            </div>
+          </div>
+
+          <div id="section-sheet-tab" class="form-section hidden">
+            <label class="form-label">Sheet Tab <span class="required">*</span></label>
+            <select id="sheet-tab-select" class="form-select">
+              <option value="">Select sheet tab...</option>
+            </select>
+          </div>
+
+          <div id="section-email-col" class="form-section hidden">
+            <label class="form-label">Email Column <span class="required">*</span></label>
+            <select id="email-col-select" class="form-select">
+              <option value="">Select column containing email addresses...</option>
+            </select>
+            <p class="form-hint" id="recipient-count-hint"></p>
+          </div>
+
+          <div class="form-section">
+            <label class="form-label">Gmail Draft Template <span class="required">*</span></label>
+            <div class="search-wrapper">
+              <input id="draft-search" type="text" class="form-input" placeholder="Search drafts by subject...">
+              <button id="btn-refresh-drafts" class="btn btn-sm btn-ghost">Refresh</button>
+            </div>
+            <div id="draft-results" class="dropdown-list hidden"></div>
+            <div id="selected-draft" class="selected-item hidden">
+              <span class="selected-icon">📧</span>
+              <div class="selected-info">
+                <div id="selected-draft-subject" class="selected-name"></div>
+                <div id="selected-draft-snippet" class="selected-sub"></div>
+              </div>
+              <button id="btn-clear-draft" class="clear-btn">✕</button>
+            </div>
+            <p class="form-hint">Create a Gmail draft first. Use <code>{{Column Name}}</code> for merge fields.</p>
+          </div>
+
+          <div class="step-actions">
+            <span></span>
+            <button id="btn-step1-next" class="btn btn-primary" disabled>Next: Configure →</button>
+          </div>
+        </div>
+
+        <!-- Step 2: Configure -->
+        <div id="step-2" class="wizard-step hidden">
+          <h2>Step 2: Configure sending options</h2>
+          <p class="step-desc">Customize who the email comes from, set up CC/BCC, and configure tracking.</p>
+
+          <div class="form-row">
+            <div class="form-section">
+              <label class="form-label">From Name</label>
+              <input id="from-name" type="text" class="form-input" placeholder="Your Name">
+            </div>
+            <div class="form-section">
+              <label class="form-label">Send As (alias)</label>
+              <select id="send-as-select" class="form-select">
+                <option value="">Loading aliases...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-section">
+              <label class="form-label">Reply-To Email</label>
+              <input id="reply-to" type="email" class="form-input" placeholder="reply@example.com">
+            </div>
+            <div class="form-section">
+              <label class="form-label">Reply-To Name</label>
+              <input id="reply-to-name" type="text" class="form-input" placeholder="Support Team">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-section">
+              <label class="form-label">CC <span class="field-hint">(column name or static email)</span></label>
+              <input id="cc-field" type="text" class="form-input" placeholder="CC Email or {{CC Column}}">
+            </div>
+            <div class="form-section">
+              <label class="form-label">BCC <span class="field-hint">(column name or static email)</span></label>
+              <input id="bcc-field" type="text" class="form-input" placeholder="BCC Email or {{BCC Column}}">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <label class="form-label">Scheduled Send</label>
+            <div class="schedule-row">
+              <label class="radio-label">
+                <input type="radio" name="send-time" value="now" checked> Send now
+              </label>
+              <label class="radio-label">
+                <input type="radio" name="send-time" value="scheduled"> Schedule for later
+              </label>
+            </div>
+            <div id="schedule-datetime" class="hidden">
+              <input id="schedule-date" type="datetime-local" class="form-input" style="width:auto">
+            </div>
+          </div>
+
+          <div class="form-section">
+            <label class="form-label">Sending Limits</label>
+            <div class="form-row">
+              <div class="form-section">
+                <label class="form-sublabel">Emails per batch</label>
+                <input id="batch-size" type="number" class="form-input" value="50" min="1" max="500">
+              </div>
+              <div class="form-section">
+                <label class="form-sublabel">Delay between emails (ms)</label>
+                <input id="send-delay" type="number" class="form-input" value="300" min="0" max="10000">
+              </div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <label class="form-label">Tracking &amp; Extras</label>
+            <div class="checkbox-group">
+              <label class="checkbox-label">
+                <input type="checkbox" id="opt-track-opens"> Track email opens
+                <span class="badge badge-pro">Needs tracking server</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="opt-track-clicks"> Track link clicks
+                <span class="badge badge-pro">Needs tracking server</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="opt-unsubscribe"> Add unsubscribe link
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="opt-skip-sent" checked> Skip rows already sent (Email Sent column)
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="opt-update-sheet" checked> Update sheet with send status
+              </label>
+            </div>
+          </div>
+
+          <div id="tracking-server-section" class="form-section info-box hidden">
+            <strong>Tracking Server URL</strong>
+            <p>Enter the base URL of your deployed tracking server (Google Apps Script Web App URL).</p>
+            <input id="tracking-server-url" type="url" class="form-input" placeholder="https://script.google.com/macros/s/...">
+            <p class="form-hint"><a href="#" id="link-tracking-setup">How to set up the tracking server →</a></p>
+          </div>
+
+          <div id="unsubscribe-section" class="form-section hidden">
+            <label class="form-sublabel">Unsubscribe link text</label>
+            <input id="unsubscribe-text" type="text" class="form-input" value="Unsubscribe from this list">
+          </div>
+
+          <div class="step-actions">
+            <button id="btn-step2-back" class="btn btn-secondary">← Back</button>
+            <button id="btn-step2-next" class="btn btn-primary">Next: Preview →</button>
+          </div>
+        </div>
+
+        <!-- Step 3: Preview -->
+        <div id="step-3" class="wizard-step hidden">
+          <h2>Step 3: Preview your emails</h2>
+          <p class="step-desc">Review how your emails will look before sending.</p>
+
+          <div class="preview-toolbar">
+            <div class="preview-nav">
+              <button id="btn-prev-preview" class="btn btn-sm btn-secondary">← Prev</button>
+              <span id="preview-counter" class="preview-counter">1 of 0</span>
+              <button id="btn-next-preview" class="btn btn-sm btn-secondary">Next →</button>
+            </div>
+            <div class="preview-stats">
+              <span id="preview-total-count" class="stat-chip">0 recipients</span>
+              <span id="preview-skip-count" class="stat-chip stat-skip">0 skipped</span>
+              <span id="preview-error-count" class="stat-chip stat-error">0 errors</span>
+            </div>
+            <button id="btn-send-test" class="btn btn-sm btn-secondary">Send Test Email</button>
+          </div>
+
+          <div id="preview-pane" class="preview-pane">
+            <div class="preview-meta">
+              <div class="preview-meta-row"><span class="meta-label">To:</span><span id="preview-to"></span></div>
+              <div class="preview-meta-row"><span class="meta-label">From:</span><span id="preview-from"></span></div>
+              <div class="preview-meta-row" id="preview-cc-row" style="display:none"><span class="meta-label">CC:</span><span id="preview-cc"></span></div>
+              <div class="preview-meta-row"><span class="meta-label">Subject:</span><span id="preview-subject" class="preview-subject"></span></div>
+            </div>
+            <div id="preview-body" class="preview-body"></div>
+          </div>
+
+          <div class="variables-section">
+            <h3>Merge Variables in Template</h3>
+            <div id="variables-list" class="variables-list"></div>
+          </div>
+
+          <div class="step-actions">
+            <button id="btn-step3-back" class="btn btn-secondary">← Back</button>
+            <button id="btn-step3-send" class="btn btn-primary btn-send">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/>
+              </svg>
+              Send <span id="send-count-label">0</span> Emails
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 4: Sending Progress -->
+        <div id="step-4" class="wizard-step hidden">
+          <h2>Sending emails…</h2>
+          <div class="progress-section">
+            <div class="progress-bar-wrapper">
+              <div id="progress-bar" class="progress-bar" style="width:0%"></div>
+            </div>
+            <div class="progress-stats">
+              <div class="progress-stat sent"><span id="prog-sent">0</span><label>Sent</label></div>
+              <div class="progress-stat failed"><span id="prog-failed">0</span><label>Failed</label></div>
+              <div class="progress-stat skipped"><span id="prog-skipped">0</span><label>Skipped</label></div>
+              <div class="progress-stat total"><span id="prog-total">0</span><label>Total</label></div>
+            </div>
+            <div id="progress-log" class="progress-log"></div>
+          </div>
+          <div class="step-actions">
+            <button id="btn-stop-sending" class="btn btn-danger">Stop Sending</button>
+            <span id="sending-status" class="sending-status">Preparing...</span>
+          </div>
+        </div>
+
+        <!-- Step 5: Report -->
+        <div id="step-5" class="wizard-step hidden">
+          <div class="report-header">
+            <div id="report-icon" class="report-icon success">✓</div>
+            <h2 id="report-title">Mail Merge Complete!</h2>
+            <p id="report-subtitle" class="report-subtitle"></p>
+          </div>
+          <div class="report-stats">
+            <div class="report-stat"><span id="report-sent">0</span><label>Emails Sent</label></div>
+            <div class="report-stat"><span id="report-failed">0</span><label>Failed</label></div>
+            <div class="report-stat"><span id="report-skipped">0</span><label>Skipped</label></div>
+            <div class="report-stat"><span id="report-duration">0s</span><label>Duration</label></div>
+          </div>
+          <div class="report-actions">
+            <button id="btn-open-sheet" class="btn btn-secondary">Open Spreadsheet</button>
+            <button id="btn-new-campaign" class="btn btn-primary">New Campaign</button>
+          </div>
+          <div id="report-errors" class="report-errors hidden">
+            <h3>Errors</h3>
+            <ul id="error-list"></ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── View: Campaigns ─────────────────────────────────────────────── -->
+      <div id="view-campaigns" class="content-view hidden">
+        <div class="view-header">
+          <h2>Campaigns</h2>
+          <button class="btn btn-primary" data-view-trigger="new-campaign">+ New Campaign</button>
+        </div>
+        <div id="campaigns-list" class="campaigns-list">
+          <div class="empty-state">
+            <div class="empty-icon">📭</div>
+            <p>No campaigns yet. Start your first mail merge!</p>
+            <button class="btn btn-primary" data-view-trigger="new-campaign">Start Mail Merge</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── View: Scheduled ─────────────────────────────────────────────── -->
+      <div id="view-scheduled" class="content-view hidden">
+        <div class="view-header">
+          <h2>Scheduled Campaigns</h2>
+        </div>
+        <div id="scheduled-list" class="campaigns-list">
+          <div class="empty-state">
+            <div class="empty-icon">🗓</div>
+            <p>No scheduled campaigns.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── View: Templates ─────────────────────────────────────────────── -->
+      <div id="view-templates" class="content-view hidden">
+        <div class="view-header">
+          <h2>Gmail Draft Templates</h2>
+          <button id="btn-refresh-all-drafts" class="btn btn-secondary">Refresh Drafts</button>
+        </div>
+        <p class="view-desc">Your Gmail drafts act as email templates. Use <code>{{Column Name}}</code> placeholders in the subject and body.</p>
+        <div id="templates-list" class="templates-list">
+          <div class="empty-state">
+            <div class="empty-icon">📝</div>
+            <p>Loading drafts...</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── View: Quota ─────────────────────────────────────────────────── -->
+      <div id="view-quota" class="content-view hidden">
+        <div class="view-header"><h2>Email Quota</h2></div>
+        <div class="quota-card">
+          <div class="quota-header">
+            <h3>Daily Sending Limit</h3>
+            <span id="quota-type-badge" class="badge">Free Gmail</span>
+          </div>
+          <div class="quota-gauge-wrapper">
+            <div class="quota-gauge">
+              <div id="quota-gauge-fill" class="quota-gauge-fill" style="width:0%"></div>
+            </div>
+            <div class="quota-numbers">
+              <span id="quota-used">0</span> / <span id="quota-limit">500</span> emails sent today
+            </div>
+          </div>
+          <p class="quota-reset-info">Quota resets daily. Gmail free accounts: ~500/day. Google Workspace: up to 2,000/day.</p>
+        </div>
+        <div class="quota-settings">
+          <h3>Quota Settings</h3>
+          <div class="form-row">
+            <div class="form-section">
+              <label class="form-label">Daily limit (self-imposed)</label>
+              <input id="daily-limit-input" type="number" class="form-input" value="400" min="1" max="2000">
+            </div>
+          </div>
+          <button id="btn-save-quota" class="btn btn-primary">Save</button>
+        </div>
+        <div class="quota-history">
+          <h3>Sending History (last 7 days)</h3>
+          <div id="quota-history-chart" class="history-chart"></div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+
+  <!-- ── Modals ───────────────────────────────────────────────────────────── -->
+  <div id="modal-overlay" class="modal-overlay hidden">
+    <!-- Test Send Modal -->
+    <div id="modal-test-send" class="modal hidden">
+      <div class="modal-header">
+        <h3>Send Test Email</h3>
+        <button class="modal-close" data-modal="modal-test-send">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>Send a test email using the data from the first row.</p>
+        <div class="form-section">
+          <label class="form-label">Send test to</label>
+          <input id="test-email-addr" type="email" class="form-input" placeholder="your@email.com">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-modal-close="modal-test-send">Cancel</button>
+        <button id="btn-confirm-test-send" class="btn btn-primary">Send Test</button>
+      </div>
+    </div>
+
+    <!-- Confirm Send Modal -->
+    <div id="modal-confirm-send" class="modal hidden">
+      <div class="modal-header">
+        <h3>Confirm Mail Merge</h3>
+        <button class="modal-close" data-modal="modal-confirm-send">✕</button>
+      </div>
+      <div class="modal-body">
+        <p id="confirm-send-message"></p>
+        <div class="confirm-checklist">
+          <label class="checkbox-label"><input type="checkbox" id="confirm-check-reviewed"> I have reviewed the preview</label>
+          <label class="checkbox-label"><input type="checkbox" id="confirm-check-recipients"> I confirm the recipient list is correct</label>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-modal-close="modal-confirm-send">Cancel</button>
+        <button id="btn-confirm-send" class="btn btn-primary" disabled>Send Now</button>
+      </div>
+    </div>
+
+    <!-- Tracking Setup Modal -->
+    <div id="modal-tracking-setup" class="modal hidden">
+      <div class="modal-header">
+        <h3>Set Up Tracking Server</h3>
+        <button class="modal-close" data-modal="modal-tracking-setup">✕</button>
+      </div>
+      <div class="modal-body tracking-setup-body">
+        <ol>
+          <li>Open <a href="https://script.google.com" target="_blank">Google Apps Script</a> and create a new project.</li>
+          <li>Copy and paste the tracking server code from <code>tracker/apps-script.js</code> in this extension folder.</li>
+          <li>Click <strong>Deploy → New deployment → Web App</strong>.</li>
+          <li>Set "Execute as: Me" and "Who has access: Anyone".</li>
+          <li>Copy the deployment URL and paste it in the Tracking Server URL field.</li>
+        </ol>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-primary" data-modal-close="modal-tracking-setup">Got it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast hidden"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
