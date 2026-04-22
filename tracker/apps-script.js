@@ -24,7 +24,9 @@
  */
 
 // ─── CONFIGURATION ──────────────────────────────────────────────────────────
-const TRACKING_SHEET_ID = 'YOUR_GOOGLE_SPREADSHEET_ID_HERE';
+// No hardcoded sheet ID needed — the spreadsheet ID is passed as the `sid`
+// URL parameter by the extension, so tracking logs go into the same sheet
+// used for each campaign automatically.
 const TRACKING_SHEET_NAME = 'Tracking Log';
 const UNSUBSCRIBE_SHEET_NAME = 'Unsubscribes';
 
@@ -35,21 +37,22 @@ function doGet(e) {
   const campaignId = params.cid || '';
   const email = decodeURIComponent(params.email || '');
   const redirectUrl = decodeURIComponent(params.url || '');
+  const spreadsheetId = params.sid || '';  // ID of the campaign's own spreadsheet
 
   try {
     if (type === 'open') {
-      recordEvent(campaignId, email, 'open');
+      recordEvent(spreadsheetId, campaignId, email, 'open');
       return trackingPixelResponse();
     }
 
     if (type === 'click') {
-      recordEvent(campaignId, email, 'click', redirectUrl);
+      recordEvent(spreadsheetId, campaignId, email, 'click', redirectUrl);
       return HtmlService.createHtmlOutput(redirectScript(redirectUrl));
     }
 
     if (type === 'unsubscribe') {
       if (params.confirmed === '1') {
-        recordUnsubscribe(email);
+        recordUnsubscribe(spreadsheetId, email);
         return HtmlService.createHtmlOutput(unsubscribedPage());
       }
       return HtmlService.createHtmlOutput(confirmUnsubscribePage(email, getWebAppUrl(e)));
@@ -57,7 +60,7 @@ function doGet(e) {
 
     if (type === 'status') {
       return ContentService
-        .createTextOutput(JSON.stringify(getCampaignStats(campaignId)))
+        .createTextOutput(JSON.stringify(getCampaignStats(spreadsheetId, campaignId)))
         .setMimeType(ContentService.MimeType.JSON);
     }
 
@@ -70,8 +73,8 @@ function doGet(e) {
 }
 
 // ─── EVENT LOGGING ───────────────────────────────────────────────────────────
-function recordEvent(campaignId, email, eventType, url) {
-  const ss = SpreadsheetApp.openById(TRACKING_SHEET_ID);
+function recordEvent(spreadsheetId, campaignId, email, eventType, url) {
+  const ss = SpreadsheetApp.openById(spreadsheetId);
   let sheet = ss.getSheetByName(TRACKING_SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(TRACKING_SHEET_NAME);
@@ -88,8 +91,8 @@ function recordEvent(campaignId, email, eventType, url) {
   ]);
 }
 
-function recordUnsubscribe(email) {
-  const ss = SpreadsheetApp.openById(TRACKING_SHEET_ID);
+function recordUnsubscribe(spreadsheetId, email) {
+  const ss = SpreadsheetApp.openById(spreadsheetId);
   let sheet = ss.getSheetByName(UNSUBSCRIBE_SHEET_NAME);
   if (!sheet) {
     sheet = ss.insertSheet(UNSUBSCRIBE_SHEET_NAME);
@@ -97,12 +100,12 @@ function recordUnsubscribe(email) {
     sheet.setFrozenRows(1);
   }
   sheet.appendRow([new Date().toISOString(), email]);
-  recordEvent('', email, 'unsubscribe');
+  recordEvent(spreadsheetId, '', email, 'unsubscribe');
 }
 
-function getCampaignStats(campaignId) {
+function getCampaignStats(spreadsheetId, campaignId) {
   try {
-    const ss = SpreadsheetApp.openById(TRACKING_SHEET_ID);
+    const ss = SpreadsheetApp.openById(spreadsheetId);
     const sheet = ss.getSheetByName(TRACKING_SHEET_NAME);
     if (!sheet) return { opens: 0, clicks: 0, unsubscribes: 0 };
     const data = sheet.getDataRange().getValues();

@@ -481,10 +481,10 @@ function buildMergedRecipients() {
     const mergedSubject = MergeEngine.process(subject, vars);
     const mergedHtml = MergeEngine.process(htmlBody || textBody, vars, {
       trackingPixelUrl: (document.getElementById('opt-track-opens').checked && trackingUrl)
-        ? `${trackingUrl}?type=open&cid=${encodeURIComponent(state.currentCampaignId || 'campaign')}&email=${encodeURIComponent(email)}`
+        ? `${trackingUrl}?type=open&cid=${encodeURIComponent(state.currentCampaignId || 'campaign')}&email=${encodeURIComponent(email)}&sid=${encodeURIComponent(state.selectedSpreadsheet.id)}`
         : null,
       unsubscribeUrl: addUnsubscribe && trackingUrl
-        ? `${trackingUrl}?type=unsubscribe&email=${encodeURIComponent(email)}`
+        ? `${trackingUrl}?type=unsubscribe&email=${encodeURIComponent(email)}&sid=${encodeURIComponent(state.selectedSpreadsheet.id)}`
         : null,
       unsubscribeText: unsubText,
     });

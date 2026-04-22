@@ -110,8 +110,7 @@ Tracking requires a free server hosted on Google Apps Script.
 
 1. Go to [script.google.com](https://script.google.com) → New Project.
 2. Copy the contents of `tracker/apps-script.js` into the editor.
-3. Set `TRACKING_SHEET_ID` to the ID of a Google Sheet where you want logs stored.
-4. Click **Deploy → New deployment → Web App**.
+3. Click **Deploy → New deployment → Web App**.
 5. Set:
    - Execute as: **Me**
    - Who has access: **Anyone**
